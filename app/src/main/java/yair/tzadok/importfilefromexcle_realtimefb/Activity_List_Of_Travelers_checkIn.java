@@ -26,11 +26,14 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
-import java.util.Objects;
 
 public class Activity_List_Of_Travelers_checkIn extends AppCompatActivity {
 
@@ -39,14 +42,12 @@ public class Activity_List_Of_Travelers_checkIn extends AppCompatActivity {
 
     private ArrayList<Traveler> excelTravelersAttendanceInfo;
     private Adapter_ImportTravelersFromExcel excelTravelerAttendanceAdapter;
-
+    private ExcelFileHelper excelFileHelper;
     private File excelFile;
 
+    private static final String DATA_FILE_NAME = "travelers_data.dat";
     private AdView adView;
     private AdView adView1;
-
-    // Local map to store attendance data
-    private HashMap<String, Traveler> travelerAttendanceMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,14 +88,15 @@ public class Activity_List_Of_Travelers_checkIn extends AppCompatActivity {
         Button btnScan = findViewById(R.id.btnScan);
         Button createExcelFileBtn = findViewById(R.id.createExcelFileBtn);
 
+        excelFileHelper = new ExcelFileHelper(this);
+
         travelerAttendanceRV.setLayoutManager(new LinearLayoutManager(this));
         excelTravelersAttendanceInfo = new ArrayList<>();
         excelTravelerAttendanceAdapter = new Adapter_ImportTravelersFromExcel(this, excelTravelersAttendanceInfo);
         excelTravelerAttendanceAdapter.attachSwipeToRecyclerView(travelerAttendanceRV);
         travelerAttendanceRV.setAdapter(excelTravelerAttendanceAdapter);
 
-        // Initialize local map to store attendance
-        travelerAttendanceMap = new HashMap<>();
+        loadTravelersData();
 
         btnScan.setOnClickListener(view -> {
             Intent intent = new Intent(Activity_List_Of_Travelers_checkIn.this, Activity_QRScanner.class);
@@ -114,7 +116,6 @@ public class Activity_List_Of_Travelers_checkIn extends AppCompatActivity {
         });
 
         createExcelFileBtn.setOnClickListener(v -> {
-            ExcelFileHelper excelFileHelper = new ExcelFileHelper(this);
             excelFileHelper.createExcelFile(excelTravelersAttendanceInfo);
             excelFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "TravelerAttendance.xls");
             Toast.makeText(Activity_List_Of_Travelers_checkIn.this, "Excel file created at " + excelFile.getAbsolutePath(), Toast.LENGTH_SHORT).show();
@@ -137,39 +138,44 @@ public class Activity_List_Of_Travelers_checkIn extends AppCompatActivity {
             if (data != null) {
                 Uri selectedTravelerExcelFileUri = data.getData();
 
-                if (selectedTravelerExcelFileUri != null) {
-                    try (InputStream inputStream = getContentResolver().openInputStream(selectedTravelerExcelFileUri)) {
-                        Workbook workbook = WorkbookFactory.create(Objects.requireNonNull(inputStream));
-                        Sheet sheet = workbook.getSheetAt(0);
+                try (InputStream inputStream = getContentResolver().openInputStream(selectedTravelerExcelFileUri)) {
+                    Workbook workbook = WorkbookFactory.create(inputStream);
+                    Sheet sheet = workbook.getSheetAt(0);
 
-                        ArrayList<Traveler> updatedTravelersList = new ArrayList<>();
-                        for (Row row : sheet) {
-                            Traveler traveler = new Traveler();
-                            Cell firstNameCell = row.getCell(0);
-                            Cell lastNameCell = row.getCell(1);
-                            Cell travelerIdCell = row.getCell(2);
-                            Cell travelerPhoneNumberCell = row.getCell(3);
-
-                            if (firstNameCell != null && lastNameCell != null && travelerIdCell != null && travelerPhoneNumberCell != null) {
-                                traveler.setFirstName(firstNameCell.getStringCellValue());
-                                traveler.setLastName(lastNameCell.getStringCellValue());
-                                traveler.setPhoneNumber(travelerPhoneNumberCell.getStringCellValue());
-                                traveler.setTravelerId(String.format(Locale.getDefault(), "%.0f", travelerIdCell.getNumericCellValue()));
-
-                                traveler.setTravelerAttendanceState("false");
-
-                                updatedTravelersList.add(traveler);
-                            }
-                        }
-                        workbook.close();
-
-                        excelTravelersAttendanceInfo.clear();
-                        excelTravelersAttendanceInfo.addAll(updatedTravelersList);
-                        excelTravelerAttendanceAdapter.notifyDataSetChanged();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        Toast.makeText(this, "Error: " + e, Toast.LENGTH_SHORT).show();
+                    HashMap<String, String> existingAttendanceStates = new HashMap<>();
+                    for (Traveler traveler : excelTravelersAttendanceInfo) {
+                        existingAttendanceStates.put(traveler.getTravelerId(), traveler.getTravelerAttendanceState());
                     }
+
+                    ArrayList<Traveler> updatedTravelersList = new ArrayList<>();
+                    for (Row row : sheet) {
+                        Traveler traveler = new Traveler();
+                        Cell firstNameCell = row.getCell(0);
+                        Cell lastNameCell = row.getCell(1);
+                        Cell travelerIdCell = row.getCell(2);
+                        Cell travelerPhoneNumberCell = row.getCell(3);
+
+                        if (firstNameCell != null && lastNameCell != null && travelerIdCell != null && travelerPhoneNumberCell != null) {
+                            traveler.setFirstName(firstNameCell.getStringCellValue());
+                            traveler.setLastName(lastNameCell.getStringCellValue());
+                            traveler.setPhoneNumber(travelerPhoneNumberCell.getStringCellValue());
+                            traveler.setTravelerId(String.format(Locale.getDefault(), "%.0f", travelerIdCell.getNumericCellValue()));
+
+                            String attendanceState = existingAttendanceStates.getOrDefault(traveler.getTravelerId(), "false");
+                            traveler.setTravelerAttendanceState(attendanceState);
+
+                            updatedTravelersList.add(traveler);
+                        }
+                    }
+                    workbook.close();
+
+                    excelTravelersAttendanceInfo.clear();
+                    excelTravelersAttendanceInfo.addAll(updatedTravelersList);
+                    excelTravelerAttendanceAdapter.notifyDataSetChanged();
+                    saveTravelersData();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Toast.makeText(this, "Error: " + e, Toast.LENGTH_SHORT).show();
                 }
             }
         } else if (requestCode == SCAN_QR_CODE_REQUEST_CODE && resultCode == RESULT_OK) {
@@ -180,28 +186,36 @@ public class Activity_List_Of_Travelers_checkIn extends AppCompatActivity {
         }
     }
 
-
     @SuppressLint("NotifyDataSetChanged")
     private void markTravelerAsPresent(String travelerId) {
-        boolean found = false;
-
         for (Traveler traveler : excelTravelersAttendanceInfo) {
             if (traveler.getTravelerId().equals(travelerId)) {
                 traveler.setTravelerAttendanceState("true");
-                found = true;
-                break;
+                excelTravelerAttendanceAdapter.notifyDataSetChanged();
+                saveTravelersData();
+                return;
             }
         }
+        Toast.makeText(this, "Traveler not found.", Toast.LENGTH_SHORT).show();
+    }
 
-        if (!found) {
-            // Traveler not found, you may want to handle this scenario
-            Traveler newTraveler = new Traveler();
-            newTraveler.setTravelerId(travelerId);
-            newTraveler.setTravelerAttendanceState("true");
-            excelTravelersAttendanceInfo.add(newTraveler);
+    private void saveTravelersData() {
+        try (FileOutputStream fos = openFileOutput(DATA_FILE_NAME, MODE_PRIVATE);
+             ObjectOutputStream oos = new ObjectOutputStream(fos)) {
+            oos.writeObject(excelTravelersAttendanceInfo);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+    }
 
-        excelTravelerAttendanceAdapter.notifyDataSetChanged();
+    private void loadTravelersData() {
+        try (FileInputStream fis = openFileInput(DATA_FILE_NAME);
+             ObjectInputStream ois = new ObjectInputStream(fis)) {
+            excelTravelersAttendanceInfo.clear();
+            excelTravelersAttendanceInfo.addAll((ArrayList<Traveler>) ois.readObject());
+        } catch (Exception e) {
+            Log.e("Load Data", "No previous data found or error loading data.");
+        }
     }
 
     @Override
@@ -220,8 +234,8 @@ public class Activity_List_Of_Travelers_checkIn extends AppCompatActivity {
 
     @Override
     protected void onResume() {
-        super.onResume();
         if (adView != null) adView.resume();
         if (adView1 != null) adView1.resume();
+        super.onResume();
     }
 }

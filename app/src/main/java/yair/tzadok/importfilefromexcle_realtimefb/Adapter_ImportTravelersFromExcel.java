@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -14,34 +15,32 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-
 import java.util.ArrayList;
 
 public class Adapter_ImportTravelersFromExcel extends RecyclerView.Adapter<Adapter_ImportTravelersFromExcel.TravelerViewHolder> {
 
     private final Context context;
     private final ArrayList<Traveler> travelersAttendanceInfo;
-    private final DatabaseReference databaseReference;
 
     public Adapter_ImportTravelersFromExcel(@NonNull Context context, ArrayList<Traveler> travelersAttendanceInfo) {
         this.context = context;
         this.travelersAttendanceInfo = travelersAttendanceInfo;
-        this.databaseReference = FirebaseDatabase.getInstance().getReference().child("Travelers");
     }
 
     // ViewHolder class
     public static class TravelerViewHolder extends RecyclerView.ViewHolder {
         public TextView travelerFullNameTV;
         public CheckBox travelerAttendanceStateCheckBox;
+        public ImageView phoneIcon; // Add this line
 
         public TravelerViewHolder(View itemView) {
             super(itemView);
             travelerFullNameTV = itemView.findViewById(R.id.traverFullNameTV);
             travelerAttendanceStateCheckBox = itemView.findViewById(R.id.travelerAttendanceStateCheckBox);
+            phoneIcon = itemView.findViewById(R.id.Call_Icon); // Add this line
         }
     }
+
 
     @NonNull
     @Override
@@ -56,17 +55,26 @@ public class Adapter_ImportTravelersFromExcel extends RecyclerView.Adapter<Adapt
         Traveler traveler = travelersAttendanceInfo.get(position);
 
         holder.travelerFullNameTV.setText(traveler.getFirstName() + " " + traveler.getLastName());
-        holder.travelerAttendanceStateCheckBox.setOnCheckedChangeListener(null); // Remove previous listener
-        holder.travelerAttendanceStateCheckBox.setChecked(traveler.getTravelerAttendanceState().equals("true")); // Set state
+        holder.travelerAttendanceStateCheckBox.setOnCheckedChangeListener(null);
+        holder.travelerAttendanceStateCheckBox.setChecked(traveler.getTravelerAttendanceState().equals("true"));
 
         holder.travelerAttendanceStateCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
             traveler.setTravelerAttendanceState(isChecked ? "true" : "false");
-            databaseReference.child(traveler.getTravelerId())
-                    .child("travelerAttendanceState")
-                    .setValue(traveler.getTravelerAttendanceState())
-                    .addOnFailureListener(e -> Toast.makeText(context, "Failed to update: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+            Toast.makeText(context, "Attendance updated for " + traveler.getFirstName(), Toast.LENGTH_SHORT).show();
+        });
+
+        // Handle phone icon click
+        holder.phoneIcon.setOnClickListener(v -> {
+            if (traveler.getPhoneNumber() != null && !traveler.getPhoneNumber().isEmpty()) {
+                Intent intent = new Intent(Intent.ACTION_DIAL);
+                intent.setData(Uri.parse("tel:" + traveler.getPhoneNumber()));
+                context.startActivity(intent);
+            } else {
+                Toast.makeText(context, "No phone number available for " + traveler.getFirstName(), Toast.LENGTH_SHORT).show();
+            }
         });
     }
+
 
     @Override
     public int getItemCount() {
@@ -84,16 +92,9 @@ public class Adapter_ImportTravelersFromExcel extends RecyclerView.Adapter<Adapt
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
                 int position = viewHolder.getAdapterPosition();
-                Traveler traveler = travelersAttendanceInfo.get(position);
-
-                // Remove from Firebase
-                databaseReference.child(traveler.getTravelerId()).removeValue()
-                        .addOnSuccessListener(aVoid -> Toast.makeText(context, "Traveler removed successfully", Toast.LENGTH_SHORT).show())
-                        .addOnFailureListener(e -> Toast.makeText(context, "Failed to remove traveler: " + e.getMessage(), Toast.LENGTH_SHORT).show());
-
-                // Remove from local list and notify adapter
                 travelersAttendanceInfo.remove(position);
                 notifyItemRemoved(position);
+                Toast.makeText(context, "Traveler removed successfully", Toast.LENGTH_SHORT).show();
             }
         };
 
@@ -101,4 +102,3 @@ public class Adapter_ImportTravelersFromExcel extends RecyclerView.Adapter<Adapt
         itemTouchHelper.attachToRecyclerView(recyclerView);
     }
 }
-
