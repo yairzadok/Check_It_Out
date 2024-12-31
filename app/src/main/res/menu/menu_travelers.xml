@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/action_help"
+        android:title="Help"
+        android:icon="@android:drawable/ic_menu_help"
+        />
+
+    <item
+        android:id="@+id/action_about"
+        android:title="About Me"
+        android:icon="@drawable/baseline_person_24"
+        />
+
+    <item
+        android:id="@+id/action_login"
+        android:title="Login"
+        android:icon="@drawable/baseline_chevron_right_24"
+        />
+
+</menu>

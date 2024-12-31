@@ -1,0 +1,111 @@
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="@color/background"
+    tools:context=".Activity_List_Of_Travelers_checkIn">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:gravity="center_horizontal">
+
+        <!-- Top Banner Ad -->
+        <com.google.android.gms.ads.AdView
+            android:id="@+id/adView1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:adSize="BANNER"
+            app:adUnitId="ca-app-pub-6678966306719937/5346935339" />
+
+        <!-- Import Button -->
+        <Button
+            android:id="@+id/importTravelerTravelerExcelBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:backgroundTint="@color/blue"
+            android:drawableLeft="@drawable/upload"
+            android:drawablePadding="8dp"
+            android:text="ייבוא קובץ"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <!-- Scan Button -->
+        <Button
+            android:id="@+id/btnScan"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:backgroundTint="@color/blue_dark"
+            android:drawableLeft="@drawable/qr_code01"
+            android:drawablePadding="8dp"
+            android:text="סרוק ברקוד"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <!-- CardView for RecyclerView -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="12dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="6dp"
+            app:cardBackgroundColor="@android:color/white">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/travelerAttendanceRV"
+                android:layout_width="match_parent"
+                android:layout_height="400dp"
+                android:padding="8dp"
+                android:clipToPadding="false"
+                android:scrollbars="vertical" />
+        </androidx.cardview.widget.CardView>
+
+        <!-- Save Excel Button -->
+        <Button
+            android:id="@+id/createExcelFileBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:backgroundTint="@color/green"
+            android:drawableLeft="@drawable/download"
+            android:drawablePadding="8dp"
+            android:text="שמור קובץ"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <!-- Send Report Button -->
+        <Button
+            android:id="@+id/sendTravelerAttendanceReportBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:backgroundTint="@color/green_button_Signup"
+            android:drawableLeft="@drawable/mail"
+            android:drawablePadding="8dp"
+            android:text="שלח דוח למייל"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <!-- Bottom Banner Ad -->
+        <com.google.android.gms.ads.AdView
+            android:id="@+id/adView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:adSize="BANNER"
+            app:adUnitId="ca-app-pub-6678966306719937/5346935339" />
+    </LinearLayout>
+
+</ScrollView>

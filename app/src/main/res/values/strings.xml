@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Check It Out</string>
+
+    <string name="title">Title</string>
+    <string name="link">Link</string>
+    <string name="visit_link">Visit Link</string>
+</resources>
+

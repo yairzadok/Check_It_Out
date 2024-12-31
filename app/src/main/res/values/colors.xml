@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="purple_100">#FBCEE4</color>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_600">#601A52</color>
+    <color name="purple_700">#FF3700B3</color>
+
+
+
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+
+    <color name="blue">#0288D1</color>
+    <color name="blue_dark">#005B9F</color>
+    <color name="blue_light">#81D4FA</color>
+
+    <color name="green">#4CAF50</color>
+    <color name="green_dark">#003300</color>
+    <color name="green_light">#AFEE6E</color>
+    <color name="green_button_enter_true">#2E926F</color>
+    <color name="green_button_enter_false">#37AA81</color>
+
+    <color name="green_button_Signup">#22524E</color>
+    <color name="button_color_share">#4CAF50</color>
+    <color name="button_color_disabled">#909191</color>
+
+    <color name="new_button_color">#FF5722</color>
+
+    <color name="orange_button_color1">#F68F42</color>
+    <color name="orange_button_color2">#F8B063</color>
+    <color name="orange_button_color3">#FAD965</color>
+    <color name="orange_button_color4">#FBE9A2</color>
+
+    <color name="yellow_button_color1">#FAE15A</color>
+
+    <color name="button_blue_color1">#023373</color>
+    <color name="button_blue_color2">#738BFC</color>
+    <color name="button_blue_color3">#5CA8ED</color>
+    <color name="button_blue_color4">#73D1DB</color>
+    <color name="button_color">#3282A6</color>
+
+    <color name="button_gray_cancel">#E7EBEC</color>
+
+    <color name="primaryTextColor">#333333</color>
+    <color name="colorPrimary">#6200EE</color> <!-- Example purple color -->
+    <color name="colorPrimaryDark">#3700B3</color> <!-- Darker shade -->
+    <color name="colorAccent">#03DAC5</color> <!-- Teal color -->
+
+    <color name="background">#F0F4F3</color>
+</resources>
