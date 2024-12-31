@@ -1,18 +1,32 @@
 {
   "project_info": {
     "project_number": "987941811803",
+    "firebase_url": "https://importfilefromexcle-realtimefb-default-rtdb.firebaseio.com",
     "project_id": "importfilefromexcle-realtimefb",
-    "storage_bucket": "importfilefromexcle-realtimefb.appspot.com"
+    "storage_bucket": "importfilefromexcle-realtimefb.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
         "mobilesdk_app_id": "1:987941811803:android:ac2a84abe585084aa8f17e",
         "android_client_info": {
-          "package_name": "yair.tzadok.importfilefromexcle_realtimefb"
+          "package_name": "com.example.importfilefromexcle_realtimefb"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "987941811803-qkm4s28oilrmfd71dpi6r08sj9i3bd5s.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.importfilefromexcle_realtimefb",
+            "certificate_hash": "92f90183bad78585ae4f07afabcf4a97a744baa4"
+          }
+        },
+        {
+          "client_id": "987941811803-hh07p16qqe7rt8rrk81cid04sulav4d4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCesF1JDJPH3A8YHdDRVQWc5yUJkVEyaVA"
@@ -20,7 +34,49 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "987941811803-hh07p16qqe7rt8rrk81cid04sulav4d4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:987941811803:android:8b51908ba41a7462a8f17e",
+        "android_client_info": {
+          "package_name": "yair.tzadok.importfilefromexcle_realtimefb"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "987941811803-9f39vdfjaho1sfqflncsivcev6713vns.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "yair.tzadok.importfilefromexcle_realtimefb",
+            "certificate_hash": "92f90183bad78585ae4f07afabcf4a97a744baa4"
+          }
+        },
+        {
+          "client_id": "987941811803-hh07p16qqe7rt8rrk81cid04sulav4d4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCesF1JDJPH3A8YHdDRVQWc5yUJkVEyaVA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "987941811803-hh07p16qqe7rt8rrk81cid04sulav4d4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

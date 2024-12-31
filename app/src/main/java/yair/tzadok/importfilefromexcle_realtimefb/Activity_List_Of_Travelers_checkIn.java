@@ -10,7 +10,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -19,11 +18,6 @@ import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -32,7 +26,6 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,12 +39,14 @@ public class Activity_List_Of_Travelers_checkIn extends AppCompatActivity {
 
     private ArrayList<Traveler> excelTravelersAttendanceInfo;
     private Adapter_ImportTravelersFromExcel excelTravelerAttendanceAdapter;
-    private DatabaseReference mDatabaseReference;
-    private ExcelFileHelper excelFileHelper;
+
     private File excelFile;
 
     private AdView adView;
     private AdView adView1;
+
+    // Local map to store attendance data
+    private HashMap<String, Traveler> travelerAttendanceMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,15 +87,14 @@ public class Activity_List_Of_Travelers_checkIn extends AppCompatActivity {
         Button btnScan = findViewById(R.id.btnScan);
         Button createExcelFileBtn = findViewById(R.id.createExcelFileBtn);
 
-        excelFileHelper = new ExcelFileHelper(this);
-
         travelerAttendanceRV.setLayoutManager(new LinearLayoutManager(this));
         excelTravelersAttendanceInfo = new ArrayList<>();
         excelTravelerAttendanceAdapter = new Adapter_ImportTravelersFromExcel(this, excelTravelersAttendanceInfo);
         excelTravelerAttendanceAdapter.attachSwipeToRecyclerView(travelerAttendanceRV);
         travelerAttendanceRV.setAdapter(excelTravelerAttendanceAdapter);
 
-        mDatabaseReference = FirebaseDatabase.getInstance().getReference();
+        // Initialize local map to store attendance
+        travelerAttendanceMap = new HashMap<>();
 
         btnScan.setOnClickListener(view -> {
             Intent intent = new Intent(Activity_List_Of_Travelers_checkIn.this, Activity_QRScanner.class);
@@ -120,6 +114,7 @@ public class Activity_List_Of_Travelers_checkIn extends AppCompatActivity {
         });
 
         createExcelFileBtn.setOnClickListener(v -> {
+            ExcelFileHelper excelFileHelper = new ExcelFileHelper(this);
             excelFileHelper.createExcelFile(excelTravelersAttendanceInfo);
             excelFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "TravelerAttendance.xls");
             Toast.makeText(Activity_List_Of_Travelers_checkIn.this, "Excel file created at " + excelFile.getAbsolutePath(), Toast.LENGTH_SHORT).show();
@@ -142,44 +137,39 @@ public class Activity_List_Of_Travelers_checkIn extends AppCompatActivity {
             if (data != null) {
                 Uri selectedTravelerExcelFileUri = data.getData();
 
-                try (InputStream inputStream = getContentResolver().openInputStream(selectedTravelerExcelFileUri)) {
-                    Workbook workbook = WorkbookFactory.create(inputStream);
-                    Sheet sheet = workbook.getSheetAt(0);
+                if (selectedTravelerExcelFileUri != null) {
+                    try (InputStream inputStream = getContentResolver().openInputStream(selectedTravelerExcelFileUri)) {
+                        Workbook workbook = WorkbookFactory.create(Objects.requireNonNull(inputStream));
+                        Sheet sheet = workbook.getSheetAt(0);
 
-                    HashMap<String, String> existingAttendanceStates = new HashMap<>();
-                    for (Traveler traveler : excelTravelersAttendanceInfo) {
-                        existingAttendanceStates.put(traveler.getTravelerId(), traveler.getTravelerAttendanceState());
-                    }
+                        ArrayList<Traveler> updatedTravelersList = new ArrayList<>();
+                        for (Row row : sheet) {
+                            Traveler traveler = new Traveler();
+                            Cell firstNameCell = row.getCell(0);
+                            Cell lastNameCell = row.getCell(1);
+                            Cell travelerIdCell = row.getCell(2);
+                            Cell travelerPhoneNumberCell = row.getCell(3);
 
-                    ArrayList<Traveler> updatedTravelersList = new ArrayList<>();
-                    for (Row row : sheet) {
-                        Traveler traveler = new Traveler();
-                        Cell firstNameCell = row.getCell(0);
-                        Cell lastNameCell = row.getCell(1);
-                        Cell travelerIdCell = row.getCell(2);
-                        Cell travelerPhoneNumberCell = row.getCell(3);
+                            if (firstNameCell != null && lastNameCell != null && travelerIdCell != null && travelerPhoneNumberCell != null) {
+                                traveler.setFirstName(firstNameCell.getStringCellValue());
+                                traveler.setLastName(lastNameCell.getStringCellValue());
+                                traveler.setPhoneNumber(travelerPhoneNumberCell.getStringCellValue());
+                                traveler.setTravelerId(String.format(Locale.getDefault(), "%.0f", travelerIdCell.getNumericCellValue()));
 
-                        if (firstNameCell != null && lastNameCell != null && travelerIdCell != null && travelerPhoneNumberCell != null) {
-                            traveler.setFirstName(firstNameCell.getStringCellValue());
-                            traveler.setLastName(lastNameCell.getStringCellValue());
-                            traveler.setPhoneNumber(travelerPhoneNumberCell.getStringCellValue());
-                            traveler.setTravelerId(String.format(Locale.getDefault(), "%.0f", travelerIdCell.getNumericCellValue()));
+                                traveler.setTravelerAttendanceState("false");
 
-                            // Preserve existing attendance state
-                            String attendanceState = existingAttendanceStates.getOrDefault(traveler.getTravelerId(), "false");
-                            traveler.setTravelerAttendanceState(attendanceState);
-
-                            updatedTravelersList.add(traveler);
+                                updatedTravelersList.add(traveler);
+                            }
                         }
-                    }
-                    workbook.close();
+                        workbook.close();
 
-                    excelTravelersAttendanceInfo.clear();
-                    excelTravelersAttendanceInfo.addAll(updatedTravelersList);
-                    excelTravelerAttendanceAdapter.notifyDataSetChanged();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    Toast.makeText(this, "Error: " + e, Toast.LENGTH_SHORT).show();
+                        excelTravelersAttendanceInfo.clear();
+                        excelTravelersAttendanceInfo.addAll(updatedTravelersList);
+                        excelTravelerAttendanceAdapter.notifyDataSetChanged();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        Toast.makeText(this, "Error: " + e, Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
         } else if (requestCode == SCAN_QR_CODE_REQUEST_CODE && resultCode == RESULT_OK) {
@@ -189,6 +179,7 @@ public class Activity_List_Of_Travelers_checkIn extends AppCompatActivity {
             }
         }
     }
+
 
     @SuppressLint("NotifyDataSetChanged")
     private void markTravelerAsPresent(String travelerId) {
@@ -203,78 +194,16 @@ public class Activity_List_Of_Travelers_checkIn extends AppCompatActivity {
         }
 
         if (!found) {
-            // Fetch traveler from Firebase if not found locally
-            mDatabaseReference.child("Travelers").child(travelerId).addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    Traveler traveler = snapshot.getValue(Traveler.class);
-                    if (traveler != null) {
-                        traveler.setTravelerAttendanceState("true");
-                        excelTravelersAttendanceInfo.add(traveler);
-                    }
-                    excelTravelerAttendanceAdapter.notifyDataSetChanged();
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    Toast.makeText(Activity_List_Of_Travelers_checkIn.this,
-                            "Failed to fetch traveler: " + error.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-            });
-        } else {
-            excelTravelerAttendanceAdapter.notifyDataSetChanged();
+            // Traveler not found, you may want to handle this scenario
+            Traveler newTraveler = new Traveler();
+            newTraveler.setTravelerId(travelerId);
+            newTraveler.setTravelerAttendanceState("true");
+            excelTravelersAttendanceInfo.add(newTraveler);
         }
 
-        // Update Firebase
-        mDatabaseReference.child("Travelers").child(travelerId).child("travelerAttendanceState").setValue("true");
+        excelTravelerAttendanceAdapter.notifyDataSetChanged();
     }
 
-
-    private void synchronizeDataFromFirebase() {
-        mDatabaseReference.child("Travelers").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                excelTravelersAttendanceInfo.clear(); // Clear existing data
-                for (DataSnapshot travelerSnapshot : snapshot.getChildren()) {
-                    Traveler traveler = travelerSnapshot.getValue(Traveler.class);
-                    if (traveler != null) {
-                        excelTravelersAttendanceInfo.add(traveler);
-                    }
-                }
-                excelTravelerAttendanceAdapter.notifyDataSetChanged(); // Notify adapter
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(Activity_List_Of_Travelers_checkIn.this,
-                        "Failed to fetch data: " + error.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    private boolean containsTraveler(String travelerId) {
-        for (Traveler traveler : excelTravelersAttendanceInfo) {
-            if (traveler.getTravelerId().equals(travelerId)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-
-    /* Firebase Methods */
-    public void addTravelerToFirebase() {
-        mDatabaseReference.child("Travelers").removeValue().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                for (Traveler traveler : excelTravelersAttendanceInfo) {
-                    mDatabaseReference.child("Travelers").child(traveler.getTravelerId())
-                            .setValue(traveler);
-                }
-            }
-        });
-    }
-
-    /* Ad Methods */
     @Override
     protected void onDestroy() {
         if (adView != null) adView.destroy();
@@ -289,15 +218,10 @@ public class Activity_List_Of_Travelers_checkIn extends AppCompatActivity {
         super.onPause();
     }
 
-    // Call synchronizeDataFromFirebase() in onResume
     @Override
     protected void onResume() {
         super.onResume();
         if (adView != null) adView.resume();
         if (adView1 != null) adView1.resume();
-
-        // Synchronize with Firebase to refresh attendance states
-        synchronizeDataFromFirebase();
     }
 }
-

@@ -50,24 +50,25 @@ dependencies {
     implementation (libs.poi.ooxml)
 
     // for the use of creating QR add these lines to the gradle
-    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
-    implementation("androidx.multidex:multidex:2.0.1")
-
+    implementation(libs.zxing.embedded)
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
+    implementation(libs.multidex)
+    implementation(libs.firebase.auth)
+    implementation(libs.play.services.auth)
     // for scanning  any QR
-    implementation("com.google.zxing:core:3.4.1")
-   implementation("com.journeyapps:zxing-android-embedded:4.3.0")
+    implementation(libs.zxing.core)
+   implementation(libs.zxing.embedded)
 // https://developer.android.com/media/camera/camerax
 
 
     val camerax_version = "1.2.2"
     // The following line is optional, as the core library is included indirectly by camera-camera2
-    implementation ("androidx.camera:camera-core:${camerax_version}")
-    implementation ("androidx.camera:camera-camera2:${camerax_version}")
+    implementation (libs.camera.core.v122)
+    implementation (libs.camera.camera2.v122)
     // If you want to additionally use the CameraX Lifecycle library
-    implementation ("androidx.camera:camera-lifecycle:${camerax_version}")
+    implementation (libs.camera.lifecycle.v122)
     // If you want to additionally use the CameraX View class
-    implementation ("androidx.camera:camera-view:1.3.2")
+    implementation (libs.camera.view.v132)
     // CameraX core library
     implementation ("androidx.camera:camera-core:1.1.0-alpha07")
     implementation ("androidx.camera:camera-camera2:1.1.0-alpha07")
@@ -101,3 +102,5 @@ dependencies {
 
 
 }
+
+apply(plugin = "com.google.gms.google-services")

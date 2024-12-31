@@ -47,20 +47,20 @@
         android:layout_marginTop="30dp"
         android:padding="16dp">
 
-<ImageView
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:src="@drawable/walking_sticks_rotated" />
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/walking_sticks_rotated" />
 
-    <Button
-        android:id="@+id/startBtb"
-        android:layout_width="340dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
-        android:background="@drawable/btn_bg"
-        android:text=" התחל כאן "
-        android:textSize="28sp"
-        app:backgroundTint="@color/blue" />
+        <Button
+            android:id="@+id/startBtb"
+            android:layout_width="340dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="50dp"
+            android:background="@drawable/btn_bg"
+            android:text=" התחל כאן "
+            android:textSize="28sp"
+            app:backgroundTint="@color/blue" />
 
-        </LinearLayout>
+    </LinearLayout>
 </LinearLayout>

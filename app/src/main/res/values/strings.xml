@@ -4,5 +4,7 @@
     <string name="title">Title</string>
     <string name="link">Link</string>
     <string name="visit_link">Visit Link</string>
+    <string name="default_web_client_id">987941811803-qkm4s28oilrmfd71dpi6r08sj9i3bd5s.apps.googleusercontent.com</string>
+
 </resources>
 
