@@ -41,7 +41,6 @@ public class Adapter_ImportTravelersFromExcel extends RecyclerView.Adapter<Adapt
         }
     }
 
-
     @NonNull
     @Override
     public TravelerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -74,7 +73,6 @@ public class Adapter_ImportTravelersFromExcel extends RecyclerView.Adapter<Adapt
             }
         });
     }
-
 
     @Override
     public int getItemCount() {
